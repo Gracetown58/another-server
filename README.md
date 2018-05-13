@@ -14,13 +14,13 @@ command line client.  See the linked documentation for details.
 `sundog-up.sh` is used to provision the server.  To create a new machine modify
 the following two lines.  (The key file will be created by the script).  
 
-  export HOST=tharsis001
-  export KEY=~/.ssh/root_tharsis001_digital_ocean
+    export HOST=tharsis001
+    export KEY=~/.ssh/root_tharsis001_digital_ocean
 
 Web server content is pushed to the server from another local git repository.  
 Edit the folowing line in `sundog-up`
 
-  export PROJECT=~/Documents/Projects/Pavonis
+    export PROJECT=~/Documents/Projects/Pavonis
 
 ## `sundog-userdata.sh`
 
