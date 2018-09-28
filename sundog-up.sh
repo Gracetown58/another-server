@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # to create a different machine (e.g. for testing), change these two lines
-export HOST=tharsis001
-export KEY=~/.ssh/root_tharsis001_digital_ocean
+export HOST=tharsis002
+export KEY=~/.ssh/root_tharsis002_digital_ocean
 
 # generates a new root key for the machine
-mv -f $KEY $KEY.backup
+if [ -f $KEY ]; then
+  mv -f $KEY $KEY.backup
+fi
 ssh-keygen -q -N '' -f $KEY
 export KEYID=$(doctl compute ssh-key import $HOST \
   --public-key-file $KEY.pub \
@@ -13,9 +15,10 @@ export KEYID=$(doctl compute ssh-key import $HOST \
   --no-header)
 
 # create the machine
+echo "Provisioning machine.  This may take several minutes..."
 export IPV4=$(doctl compute droplet create $HOST \
   --size s-1vcpu-1gb \
-  --image ubuntu-17-10-x64 \
+  --image ubuntu-18-04-x64 \
   --region sgp1 \
   --ssh-keys $KEYID \
   --user-data-file sundog-userdata.sh \
@@ -34,9 +37,13 @@ done
 
 # on host: ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub
 # security risk.  todo: monkeysphere
-export PROJECT=~/Documents/Projects/Pavonis
 export GIT_SSH_COMMAND="ssh -i $KEY -q -o StrictHostKeyChecking=no"
-cd $PROJECT
+cd ~/Documents/Projects/Pavonis
 git remote set-url origin root@$IPV4:/srv/git/tharsis.git
 git push origin master
 ssh -i $KEY root@$IPV4 "rm /srv/www/*; cd /srv/www; git pull"
+
+cd ~/Documents/Projects/Arcadia
+git remote set-url origin root@$IPV4:/srv/git/arcadia.git
+git push origin master
+ssh -i $KEY root@$IPV4 'bash -s' < ~/Documents/Projects/Sundog/sundog-arcadia-data.sh
